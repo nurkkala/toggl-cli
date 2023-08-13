@@ -9,6 +9,9 @@ packages = [{ include = "toggl_cli", from = "src" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 typer = {extras = ["all"], version = "^0.9.0"}
+httpx = "^0.24.1"
+python-dotenv = "^1.0.0"
+rich = "^13.5.2"
 
 [tool.poetry.scripts]
 toggl-cli = "toggl_cli.main:app"
