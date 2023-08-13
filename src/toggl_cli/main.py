@@ -1,12 +1,21 @@
+import logging
+
 import typer
 from dotenv import load_dotenv
 from rich.console import Console
 
-from .toggl_api import who_am_i, time_entries, list_projects, list_clients
+from .toggl_api import list_clients, list_projects, time_entries, who_am_i
 
 load_dotenv()
 console = Console()
 app = typer.Typer()
+
+
+logging.basicConfig(
+    format="%(levelname)s [%(asctime)s] %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.DEBUG,
+)
 
 
 @app.command()

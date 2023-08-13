@@ -1,38 +1,51 @@
 import os
+from functools import cache
+from typing import Any, Optional
 
 import httpx
+import pendulum
+from pendulum import DateTime
 
-print(os.getenv("TOGGL_API_TOKEN"))
 
+@cache
+def http_client():
+    toggl_api_token = os.getenv("TOGGL_API_TOKEN")
+    assert toggl_api_token is not None
 
-def who_am_i():
-    result = httpx.get(
-        "https://api.track.toggl.com/api/v9/me",
-        auth=(os.getenv("TOGGL_API_TOKEN"), "api_token"),
+    return httpx.Client(
+        base_url="https://api.track.toggl.com/api/v9",
+        auth=(toggl_api_token, "api_token"),
     )
-    return result.json()
 
 
-def time_entries():
-    result = httpx.get(
-        "https://api.track.toggl.com/api/v9/me/time_entries",
-        auth=(os.getenv("TOGGL_API_TOKEN"), "api_token"),
-        params={"start_date": "2023-08-08", "end_date": "2023-08-11"},
+def who_am_i() -> Any:
+    return http_client().get("/me").json()
+
+
+def time_entries(
+    start_date: Optional[DateTime] = None, end_date: Optional[DateTime] = None
+) -> Any:
+    if start_date is None:
+        start_date = pendulum.today().subtract(days=3)
+    if end_date is None:
+        end_date = pendulum.today()
+
+    return (
+        http_client()
+        .get(
+            "/me/time_entries",
+            params={
+                "start_date": start_date.to_date_string(),
+                "end_date": end_date.to_date_string(),
+            },
+        )
+        .json()
     )
-    return result.json()
 
 
-def list_projects():
-    result = httpx.get(
-        "https://api.track.toggl.com/api/v9/me/projects",
-        auth=(os.getenv("TOGGL_API_TOKEN"), "api_token"),
-    )
-    return result.json()
+def list_projects() -> Any:
+    return http_client().get("/me/projects").json()
 
 
-def list_clients():
-    result = httpx.get(
-        "https://api.track.toggl.com/api/v9/me/clients",
-        auth=(os.getenv("TOGGL_API_TOKEN"), "api_token"),
-    )
-    return result.json()
+def list_clients() -> Any:
+    return http_client().get("/me/clients").json()
